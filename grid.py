@@ -1,16 +1,20 @@
-import sys
-import os
+"""Takes as input the `notes` directory of the zipfile export from the
+Post-it Plus app, and creates one picture per group with the images in
+a nice grid.
+
+"""
 import collections
+import os
+import sys
 
 from slugify import slugify
 from PIL import Image
 
+
 def make_filename(key, extension):
-    print >> sys.stderr, key
-    number, name = key.split('_', 1)
-    number = int(number)
-    name = unicode(name.strip())
-    return '%02i-%s.%s' % (number, slugify(name), extension)
+    """Make a friendly filename for the image using the group key."""
+    key = unicode(key.strip())
+    return '{}.{}'.format(slugify(key), extension)
 
 # parameters
 X = 7
@@ -38,8 +42,12 @@ for key, filename_list in grouped_by_board.iteritems():
     new_width = X * SIZE + (X - 1) * PAD
     new_height = rows * SIZE + (rows - 1) * PAD
 
-    # make a new image
-    new_image = Image.new('RGB', (new_width, new_height), color=(255,255,255))
+    # make a new image big enough to hold the grid
+    new_image = Image.new(
+        'RGB',
+        (new_width, new_height),
+        color=(255, 255, 255),
+    )
 
     for image_index, filename in enumerate(filename_list):
 
