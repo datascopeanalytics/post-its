@@ -1,0 +1,22 @@
+.holder {
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+.post-it {
+    width: 100%;
+}
+.hash {
+    font-size: 8px;
+    padding-bottom: 10px;
+}
+.swatch {
+    padding-top: 10px;
+    width: 100%;
+    height: 10px;
+    display: none;
+}
+.basename {
+    display: none;
+}
