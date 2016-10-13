@@ -13,7 +13,6 @@ import sys
 from slugify import slugify
 
 import imagehash
-import ssim
 from PIL import Image
 
 X = 7
@@ -39,8 +38,44 @@ def read_duplicates(filename):
             to_remove.add(path)
     return to_remove
 
+def group_by_board_3csb(directory, dupes=set()):
 
-def group_by_board(directory, dupes=set()):
+    master_json_filename = None
+    for filename in os.listdir(directory):
+        if filename.startswith('sheet') and filename.endswith('.json'):
+            master_json_filename = os.path.join(directory, filename)
+            break
+
+    if master_json_filename is None:
+        return None
+
+    with open(master_json_filename) as infile:
+        master = json.load(infile)
+
+    duplicates_removed = 0
+    grouped_by_board = collections.defaultdict(list)
+    grouped_counter = collections.Counter()
+    for cluster in master['clusters']:
+        cluster_name = cluster['name']
+        for note in cluster['notes']:
+            filename = 'note-{}-enhanced.jpg'.format(note['contentUUID'])
+            path = os.path.join(directory, filename)
+            if path not in dupes:
+                key = cluster_name
+                if grouped_counter[key]:
+                    key_with_counter = '%s-%i' % (key, grouped_counter[key])
+                else:
+                    key_with_counter = '%s' % key
+                grouped_by_board[key_with_counter].append(path)
+                if len(grouped_by_board[key_with_counter]) >= X * MAX_Y:
+                    grouped_counter[key] += 1
+            else:
+                duplicates_removed += 1
+
+    print >> sys.stderr, 'Removed %i duplicates' % duplicates_removed
+    return sorted(grouped_by_board.items())
+
+def group_by_board_zip(directory, dupes=set()):
     duplicates_removed = 0
     grouped_by_board = collections.defaultdict(list)
     grouped_counter = collections.Counter()
@@ -60,6 +95,13 @@ def group_by_board(directory, dupes=set()):
     print >> sys.stderr, 'Removed %i duplicates' % duplicates_removed
     return sorted(grouped_by_board.items())
 
+def group_by_board(directory, dupes=set()):
+    first_try = group_by_board_3csb(directory, dupes=dupes)
+    if first_try:
+        return first_try
+    else:
+        return group_by_board_zip(directory, dupes=dupes)
+    
 # `notes` directory inside of zipfile export from post-it plus
 notes_directory = sys.argv[1]
 
