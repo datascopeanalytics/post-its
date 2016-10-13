@@ -41,7 +41,10 @@ filename_list = [
 ]
 base_color = '000'
 for path in filename_list:
-    image = Image.open(path)
+    try:
+        image = Image.open(path)
+    except IOError:
+        continue
     color = most_frequent_color(image)
     image_hash = imagehash.dhash(image, hash_size=HASH_SIZE)
     distance = hexdistance(color, base_color)
