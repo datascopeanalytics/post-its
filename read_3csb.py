@@ -1,5 +1,9 @@
 import sys
 import json
+import uuid
+
+def generate_uuid():
+    return str(uuid.uuid4()).upper()
 
 class JSONable(object):
 
@@ -142,4 +146,7 @@ class Note(JSONable):
 
 filename = sys.argv[1]
 board = Board.from_json(filename)
+    
 print board.to_json()
+
+print generate_uuid()
